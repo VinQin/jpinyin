@@ -1,12 +1,12 @@
 /**
  * DoubleArrayTrie: Java implementation of Darts (Double-ARray Trie System)
- * 
+ *
  * <p>
  * Copyright(C) 2001-2007 Taku Kudo &lt;taku@chasen.org&gt;<br />
  * Copyright(C) 2009 MURAWAKI Yugo &lt;murawaki@nlp.kuee.kyoto-u.ac.jp&gt;
  * Copyright(C) 2012 KOMIYA Atsushi &lt;komiya.atsushi@gmail.com&gt;
  * </p>
- * 
+ *
  * <p>
  * The contents of this file may be used under the terms of either of the GNU
  * Lesser General Public License Version 2.1 or later (the "LGPL"), or the BSD
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DoubleArrayTrie {
-    private final static int BUF_SIZE = 16384;
+    private final static int BUF_SIZE = 16384;// pow(2, 14)
     private final static int UNIT_SIZE = 8; // size of int + int
 
     private static class Node {
@@ -35,7 +35,7 @@ public class DoubleArrayTrie {
         int depth;
         int left;
         int right;
-    };
+    }
 
     private int check[];
     private int base[];
@@ -73,20 +73,23 @@ public class DoubleArrayTrie {
     }
 
     private int fetch(Node parent, List<Node> siblings) {
-        if (error_ < 0)
+        if (error_ < 0) {
             return 0;
+        }
 
         int prev = 0;
 
         for (int i = parent.left; i < parent.right; i++) {
-            if ((length != null ? length[i] : key.get(i).length()) < parent.depth)
+            if ((length != null ? length[i] : key.get(i).length()) < parent.depth) {
                 continue;
+            }
 
             String tmp = key.get(i);
 
             int cur = 0;
-            if ((length != null ? length[i] : tmp.length()) != parent.depth)
+            if ((length != null ? length[i] : tmp.length()) != parent.depth) {
                 cur = (int) tmp.charAt(parent.depth) + 1;
+            }
 
             if (prev > cur) {
                 error_ = -3;
@@ -98,8 +101,9 @@ public class DoubleArrayTrie {
                 tmp_node.depth = parent.depth + 1;
                 tmp_node.code = cur;
                 tmp_node.left = i;
-                if (siblings.size() != 0)
+                if (siblings.size() != 0) {
                     siblings.get(siblings.size() - 1).right = i;
+                }
 
                 siblings.add(tmp_node);
             }
@@ -107,29 +111,34 @@ public class DoubleArrayTrie {
             prev = cur;
         }
 
-        if (siblings.size() != 0)
+        if (siblings.size() != 0) {
             siblings.get(siblings.size() - 1).right = parent.right;
+        }
 
         return siblings.size();
     }
 
     private int insert(List<Node> siblings) {
-        if (error_ < 0)
+        if (error_ < 0) {
             return 0;
+        }
 
         int begin = 0;
         int pos = ((siblings.get(0).code + 1 > nextCheckPos) ? siblings.get(0).code + 1 : nextCheckPos) - 1;
         int nonzero_num = 0;
         int first = 0;
 
-        if (allocSize <= pos)
+        if (allocSize <= pos) {
             resize(pos + 1);
+        }
 
-        outer: while (true) {
+        outer:
+        while (true) {
             pos++;
 
-            if (allocSize <= pos)
+            if (allocSize <= pos) {
                 resize(pos + 1);
+            }
 
             if (check[pos] != 0) {
                 nonzero_num++;
@@ -146,12 +155,15 @@ public class DoubleArrayTrie {
                 resize((int) (allocSize * l));
             }
 
-            if (used[begin])
+            if (used[begin]) {
                 continue;
+            }
 
-            for (int i = 1; i < siblings.size(); i++)
-                if (check[begin + siblings.get(i).code] != 0)
+            for (int i = 1; i < siblings.size(); i++) {
+                if (check[begin + siblings.get(i).code] != 0) {
                     continue outer;
+                }
+            }
 
             break;
         }
@@ -162,20 +174,24 @@ public class DoubleArrayTrie {
         // 'next_check_pos' and 'check' is greater than some constant value
         // (e.g. 0.9),
         // new 'next_check_pos' index is written by 'check'.
-        if (1.0 * nonzero_num / (pos - nextCheckPos + 1) >= 0.95)
+        if (1.0 * nonzero_num / (pos - nextCheckPos + 1) >= 0.95) {
             nextCheckPos = pos;
+        }
 
         used[begin] = true;
-        size = (size > begin + siblings.get(siblings.size() - 1).code + 1) ? size : begin + siblings.get(siblings.size() - 1).code + 1;
+        size = (size > begin + siblings.get(siblings.size() - 1).code + 1) ? size : begin + siblings.get(siblings
+                .size() - 1).code + 1;
 
-        for (int i = 0; i < siblings.size(); i++)
+        for (int i = 0; i < siblings.size(); i++) {
             check[begin + siblings.get(i).code] = begin;
+        }
 
         for (int i = 0; i < siblings.size(); i++) {
             List<Node> new_siblings = new ArrayList<Node>();
 
             if (fetch(siblings.get(i), new_siblings) == 0) {
-                base[begin + siblings.get(i).code] = (value != null) ? (-value[siblings.get(i).left] - 1) : (-siblings.get(i).left - 1);
+                base[begin + siblings.get(i).code] = (value != null) ? (-value[siblings.get(i).left] - 1) :
+                        (-siblings.get(i).left - 1);
 
                 if (value != null && (-value[siblings.get(i).left] - 1) >= 0) {
                     error_ = -2;
@@ -236,9 +252,11 @@ public class DoubleArrayTrie {
 
     public int getNonzeroSize() {
         int result = 0;
-        for (int i = 0; i < size; i++)
-            if (check[i] != 0)
+        for (int i = 0; i < size; i++) {
+            if (check[i] != 0) {
                 result++;
+            }
+        }
         return result;
     }
 
@@ -247,8 +265,9 @@ public class DoubleArrayTrie {
     }
 
     public int build(List<String> _key, int _length[], int _value[], int _keySize) {
-        if (_keySize > _key.size() || _key == null)
+        if (_keySize > _key.size() || _key == null) {
             return 0;
+        }
 
         // progress_func_ = progress_func;
         key = _key;
@@ -294,8 +313,9 @@ public class DoubleArrayTrie {
                 check[i] = is.readInt();
             }
         } finally {
-            if (is != null)
+            if (is != null) {
                 is.close();
+            }
         }
     }
 
@@ -309,8 +329,9 @@ public class DoubleArrayTrie {
             }
             out.close();
         } finally {
-            if (out != null)
+            if (out != null) {
                 out.close();
+            }
         }
     }
 
@@ -319,10 +340,12 @@ public class DoubleArrayTrie {
     }
 
     public int exactMatchSearch(String key, int pos, int len, int nodePos) {
-        if (len <= 0)
+        if (len <= 0) {
             len = key.length();
-        if (nodePos <= 0)
+        }
+        if (nodePos <= 0) {
             nodePos = 0;
+        }
 
         int result = -1;
 
@@ -333,10 +356,11 @@ public class DoubleArrayTrie {
 
         for (int i = pos; i < len; i++) {
             p = b + (int) (keyChars[i]) + 1;
-            if (b == check[p])
+            if (b == check[p]) {
                 b = base[p];
-            else
+            } else {
                 return result;
+            }
         }
 
         p = b;
@@ -352,10 +376,12 @@ public class DoubleArrayTrie {
     }
 
     public List<Integer> commonPrefixSearch(String key, int pos, int len, int nodePos) {
-        if (len <= 0)
+        if (len <= 0) {
             len = key.length();
-        if (nodePos <= 0)
+        }
+        if (nodePos <= 0) {
             nodePos = 0;
+        }
 
         List<Integer> result = new ArrayList<Integer>();
 
@@ -374,10 +400,11 @@ public class DoubleArrayTrie {
             }
 
             p = b + (int) (keyChars[i]) + 1;
-            if (b == check[p])
+            if (b == check[p]) {
                 b = base[p];
-            else
+            } else {
                 return result;
+            }
         }
 
         p = b;
