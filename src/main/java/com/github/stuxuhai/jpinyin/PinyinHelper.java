@@ -160,7 +160,7 @@ public final class PinyinHelper {
                     String[] pinyinArray = convertToPinyinArray(c, pinyinFormat);
                     if (pinyinArray != null) {
                         if (pinyinArray.length > 0) {
-                            sb.append(pinyinArray[0]);
+                            sb.append(pinyinArray[0]);//直接取pinyin.dict中'='后面的第一个拼音
                         } else {
                             throw new PinyinException("Can't convert to pinyin: " + c);
                         }
@@ -206,7 +206,7 @@ public final class PinyinHelper {
      * 判断一个汉字是否为多音字
      *
      * @param c 汉字
-     * @return 判断结果，是汉字返回true，否则返回false
+     * @return 判断结果，是多音字返回true，否则返回false
      */
     public static boolean hasMultiPinyin(char c) {
         String[] pinyinArray = convertToPinyinArray(c);
@@ -274,10 +274,12 @@ public final class PinyinHelper {
     /**
      * 获取指定字符串拼音简码数组　即支持多音字
      *
-     * @param str
-     * @return
+     * @param str 汉字字符串
+     * @return 多音字的结果数组
      */
+    @Deprecated
     public static String[] getShortMulti(String str) throws PinyinException {
+        //TODO getShortMulti(String str, PinyinFormat)
         StringBuilder result = new StringBuilder();
         //多音字数量
         int multiCount = 1;
@@ -344,9 +346,10 @@ public final class PinyinHelper {
     /**
      * 获取指定字符串拼音全码数组　即支持多音字
      *
-     * @param str
-     * @return
+     * @param str 汉字字符串
+     * @return 多音字的结果数组
      */
+    @Deprecated
     public static String[] getFullMulti(String str) {
         StringBuilder result = new StringBuilder();
         //多音字数量
@@ -393,7 +396,7 @@ public final class PinyinHelper {
         result.substring(0, result.length() - 1);
         String[] temp = String.valueOf(result).split("#");
         //最后处理，并返回最终结果
-        result.setLength(0);
+        result.setLength(0);//清空result
         for (int i = 0, len = multiCount; i < len; i++) {
             for (int j = 0, len1 = str.length(); j < len1; j++) {
                 String[] tempArr = temp[j].split(",");

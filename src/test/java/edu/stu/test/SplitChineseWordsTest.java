@@ -115,6 +115,8 @@ public class SplitChineseWordsTest {
                 currentNode = root;
                 word = "";
                 sb = new StringBuilder();
+            } else if (word.equals("")) {
+                //TODO...
             }
         }
 
